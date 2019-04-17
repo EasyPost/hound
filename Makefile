@@ -21,9 +21,10 @@ $(GOPATH)/bin/hound: ui/bindata.go $(SRCS)
 	go install github.com/etsy/hound/cmds/hound
 
 .build/bin/go-bindata:
-	GOPATH=`pwd`/.build go get github.com/jteeuwen/go-bindata/...
+	$(GOPATH)/bin/go-bindata.exe
+	#GOPATH=`pwd`/.build go get github.com/jteeuwen/go-bindata/...
 
-ui/bindata.go: .build/bin/go-bindata node_modules $(wildcard ui/assets/**/*)
+ui/bindata.go: $(GOPATH)/bin/go-bindata.exe node_modules $(wildcard ui/assets/**/*)
 	rsync -r ui/assets/* .build/ui
 	npx webpack $(WEBPACK_ARGS)
 	$< -o $@ -pkg ui -prefix .build/ui -nomemcopy .build/ui/...

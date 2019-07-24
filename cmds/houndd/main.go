@@ -6,22 +6,27 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"syscall"
 
-	"github.com/etsy/hound/api"
-	"github.com/etsy/hound/config"
-	"github.com/etsy/hound/searcher"
-	"github.com/etsy/hound/ui"
+	"github.com/hound-search/hound/api"
+	"github.com/hound-search/hound/config"
+	"github.com/hound-search/hound/searcher"
+	"github.com/hound-search/hound/ui"
+	"github.com/hound-search/hound/web"
 )
 
 const gracefulShutdownSignal = syscall.SIGTERM
 
 var (
-	info_log  *log.Logger
-	error_log *log.Logger
+	info_log   *log.Logger
+	error_log  *log.Logger
+	_, b, _, _ = runtime.Caller(0)
+	basepath   = filepath.Dir(b)
 )
 
 func makeSearchers(cfg *config.Config) (map[string]*searcher.Searcher, bool, error) {
@@ -124,6 +129,9 @@ func main() {
 		panic(err)
 	}
 
+	// Start the web server on a background routine.
+	ws := web.Start(&cfg, *flagAddr, *flagDev)
+
 	// It's not safe to be killed during makeSearchers, so register the
 	// shutdown signal here and defer processing it until we are ready.
 	shutdownCh := registerShutdownSignal()
@@ -144,9 +152,20 @@ func main() {
 		host = "localhost" + host
 	}
 
+	if *flagDev {
+		info_log.Printf("[DEV] starting webpack-dev-server at localhost:8080...")
+		webpack := exec.Command("./node_modules/.bin/webpack-dev-server", "--mode", "development")
+		webpack.Dir = basepath + "/../../"
+		webpack.Stdout = os.Stdout
+		webpack.Stderr = os.Stderr
+		err = webpack.Start()
+		if err != nil {
+			error_log.Println(err)
+		}
+	}
+
 	info_log.Printf("running server at http://%s...\n", host)
 
-	if err := runHttp(*flagAddr, *flagDev, &cfg, idx); err != nil {
-		panic(err)
-	}
+	// Fully enable the web server now that we have indexes
+	panic(ws.ServeWithIndex(idx))
 }

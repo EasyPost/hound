@@ -1,6 +1,6 @@
 # Hound
 
-[![Build Status](https://travis-ci.org/etsy/hound.svg?branch=master)](https://travis-ci.org/etsy/hound) [![Join the chat at https://gitter.im/etsy/Hound](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/etsy/Hound?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/hound-search/hound.svg?branch=master)](https://travis-ci.org/hound-search/hound) 
 
 Hound is an extremely fast source code search engine. The core is based on this article (and code) from Russ Cox:
 [Regular Expression Matching with a Trigram Index](http://swtch.com/~rsc/regexp/regexp4.html). Hound itself is a static
@@ -15,7 +15,7 @@ Hound is an extremely fast source code search engine. The core is based on this 
 1. Use the Go tools to install Hound. The binaries `houndd` (server) and `hound` (cli) will be installed in your $GOPATH.
 
 ```
-go get github.com/etsy/hound/cmds/...
+go get github.com/hound-search/hound/cmds/...
 ```
 
 2. Create a [config.json](config-example.json) in a directory with your list of repositories.
@@ -42,7 +42,7 @@ You should be able to navigate to [http://localhost:6080/](http://localhost:6080
 
 ## Running in Production
 
-There are no special flags to run Hound in production. You can use the `--addr=:6880` flag to control the port to which the server binds. Currently, Hound does not supports SSL/TLS as most users simply run Hound behind either Apache or nginx. Adding TLS support is pretty straight forward though if anyone wants to add it.
+There are no special flags to run Hound in production. You can use the `--addr=:6880` flag to control the port to which the server binds. Currently, Hound does not support TLS as most users simply run Hound behind either Apache or nginx. Adding TLS support is pretty straight forward though if anyone wants to add it.
 
 ## Why Another Code Search Tool?
 
@@ -88,6 +88,7 @@ Currently the following editors have plugins that support Hound:
 * [Sublime Text](https://github.com/bgreenlee/SublimeHound)
 * [Vim](https://github.com/urthbound/hound.vim)
 * [Emacs](https://github.com/ryoung786/hound.el)
+* [Visual Studio Code](https://github.com/sjzext/vscode-hound)
 
 ## Hacking on Hound
 
@@ -96,15 +97,21 @@ Currently the following editors have plugins that support Hound:
 #### Requirements:
  * make
  * Node.js ([Installation Instructions](https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager))
- * React-tools (install w/ `npm -g install react-tools`)
 
-Hound includes tools to make building locally easy. It is recommended that you use these tools if you are working on Hound. To get setup and build, just run the following commands:
+Hound includes a `Makefile` to aid in building locally, but it depends on the source being added to a proper Go workspace so that
+Go tools work accordingly. See [Setting GOPATH](https://github.com/golang/go/wiki/SettingGOPATH) for further details about setting
+up your Go workspace. With a `GOPATH` set, the following commands will build hound locally.
 
 ```
-git clone https://github.com/etsy/hound.git hound/src/github.com/etsy/hound
-cd hound
-src/github.com/etsy/hound/tools/setup
+git clone https://github.com/hound-search/hound.git ${GOPATH}/src/github.com/hound-search/hound
+cd ${GOPATH}/src/github.com/hound-search/hound
 make
+```
+
+If this is your only Go project, you can set your GOPATH just for Hound:
+```
+git clone https://github.com/hound-search/hound.git src/github.com/hound-search/hound
+GOPATH=$(pwd) make -C src/github.com/hound-search/hound
 ```
 
 ### Testing
@@ -119,7 +126,21 @@ make test
 
 Hound includes a web UI that is composed of several files (html, css, javascript, etc.). To make sure hound works seamlessly with the standard Go tools, these resources are all bundled inside of the `houndd` binary. Note that changes to the UI will result in local changes to the `ui/bindata.go` file. You must include these changes in your Pull Request.
 
+To bundle UI changes in `ui/bindata.go` use:
+
+```
+make ui
+```
+
 To make development easier, there is a flag that will read the files from the file system (allowing the much-loved edit/refresh cycle).
+
+First you should ensure you have all the dependencies installed that you need by running:
+
+```
+make dev
+```
+
+Then run the hound server with the --dev option:
 
 ```
 bin/houndd --dev

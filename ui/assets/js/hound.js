@@ -1,4 +1,4 @@
-/** @jsx React.DOM */
+import {UrlToRepo} from './common';
 
 var Signal = function() {
 };
@@ -59,6 +59,10 @@ var ParamsFromQueryString = function(qs, params) {
     if (pair.length != 2) {
       return;
     }
+
+    // Handle classic '+' representation of spaces, such as is used
+    // when Hound is set up in Chrome's Search Engine Manager settings
+    pair[1] = pair[1].replace(/\+/g, ' ');
 
     params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
   });
@@ -209,7 +213,7 @@ var Model = {
         }
 
         results.sort(function(a, b) {
-          return b.Matches.length - a.Matches.length;
+          return b.Matches.length - a.Matches.length || a.Repo.localeCompare(b.Repo);
         });
 
         var byRepo = {};
@@ -292,7 +296,7 @@ var Model = {
   },
 
   UrlToRepo: function(repo, path, line, rev) {
-    return lib.UrlToRepo(this.repos[repo], path, line, rev);
+    return UrlToRepo(this.repos[repo], path, line, rev);
   }
 
 };
@@ -507,7 +511,7 @@ var SearchBar = React.createClass({
               <div className="field-input">
                 <input type="text"
                     id="files"
-                    placeholder="/regexp/"
+                    placeholder="regexp"
                     ref="files"
                     onKeyDown={this.filesGotKeydown}
                     onFocus={this.filesGotFocus} />

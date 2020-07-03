@@ -25,7 +25,7 @@ go get github.com/hound-search/hound/cmds/...
 2015/03/13 09:07:42 Searcher started for statsd
 2015/03/13 09:07:42 Searcher started for Hound
 2015/03/13 09:07:42 All indexes built!
-2015/03/13 09:07:42 running server at http://localhost:6080...
+2015/03/13 09:07:42 running server at http://localhost:6080
 ```
 
 ### Using Docker (1.4+)
@@ -117,10 +117,18 @@ GOPATH=$(pwd) make -C src/github.com/hound-search/hound
 ### Testing
 
 There are an increasing number of tests in each of the packages in Hound. Please make sure these pass before uploading your Pull Request. You can run the tests with the following command.
+To run the entire test suite, use:
 
 ```
 make test
 ```
+
+If you want to just run the JavaScript test suite, use:
+```
+npm test
+```
+
+Any Go files that end in `_test.go` are assumed to be test files.  Similarly, any JavaScript files that ends in `.test.js` are automatically run by Jest, our test runner. Tests should live next to the files that they cover. [Check out Jest's docs](https://jestjs.io/docs/en/getting-started) for more details on writing Jest tests, and [check out Go's testing docs](https://golang.org/pkg/testing/) for more details on testing Go code.
 
 ### Working on the web UI
 

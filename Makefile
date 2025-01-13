@@ -24,23 +24,11 @@ node_modules/build:
 .build/bin/hound: $(SRCS)
 	go build -o $@ github.com/hound-search/hound/cmds/hound
 
-<<<<<<< HEAD
-ui/.build/ui: node_modules/build $(UI)
-	mkdir -p ui/.build/ui
-	cp -r ui/assets/* ui/.build/ui
-||||||| 6249481
-.build/bin/go-bindata:
-	GOPATH=`pwd`/.build go get github.com/go-bindata/go-bindata/...
-
-ui/bindata.go: .build/bin/go-bindata node_modules $(wildcard ui/assets/**/*)
-	rsync -r ui/assets/* .build/ui
-=======
 .build/bin/go-bindata:
 	GOPATH=`pwd`/.build go install github.com/go-bindata/go-bindata/...
 
 ui/bindata.go: .build/bin/go-bindata node_modules $(wildcard ui/assets/**/*)
 	rsync -r ui/assets/* .build/ui
->>>>>>> merge_ours
 	npx webpack $(WEBPACK_ARGS)
 
 dev: node_modules/build

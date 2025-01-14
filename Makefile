@@ -29,13 +29,6 @@ ui/.build/ui: node_modules/build $(UI)
 	cp -r ui/assets/* ui/.build/ui
 	npx webpack $(WEBPACK_ARGS)
 
-.build/bin/go-bindata:
-	GOPATH=`pwd`/.build go install github.com/go-bindata/go-bindata/...
-
-ui/bindata.go: .build/bin/go-bindata node_modules $(wildcard ui/assets/**/*)
-	rsync -r ui/assets/* .build/ui
-
-
 dev: node_modules/build
 
 test:

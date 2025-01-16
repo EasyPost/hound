@@ -21,7 +21,7 @@ node_modules/build:
 .build/bin/houndd: ui/.build/ui $(SRCS)
 	go build -o $@ github.com/hound-search/hound/cmds/houndd
 
-.build/bin/hound: $(SRCS)
+.build/bin/hound: ui/bindata.go $(SRCS)
 	go build -o $@ github.com/hound-search/hound/cmds/hound
 
 ui/.build/ui: node_modules/build $(UI)

@@ -19,10 +19,10 @@ node_modules/build:
 	date -u >> $@
 
 .build/bin/houndd: ui/.build/ui $(SRCS)
-	go build -o $@ ${REPO:-github.com/hound-search/hound}/cmds/houndd
+	go install github.com/hound-search/hound/cmds/houndd@latest
 
 .build/bin/hound: $(SRCS)
-	go build -o $@ ${REPO:-github.com/hound-search/hound}/cmds/hound
+	go install github.com/hound-search/hound/cmds/hound@latest
 
 ui/.build/ui: node_modules/build $(UI)
 	mkdir -p ui/.build/ui

@@ -1,7 +1,7 @@
+import { merge } from 'merge-anything';
+import reqwest from 'reqwest';
 import { EscapeRegExp, UrlParts, UrlToRepo } from "./common";
 import { Signal } from "./signal";
-import reqwest from 'reqwest';
-import { merge } from 'merge-anything';
 
 var css = function (el, n, v) {
     el.style.setProperty(n, v, "");
@@ -726,7 +726,7 @@ var ContentFor = function (line, regexp) {
 
 var FileContentView = React.createClass({
   getInitialState: function() {
-    return { open: true };
+    return { open: this.props.defaultOpen !== undefined ? this.props.defaultOpen : true };
   },
   toggleContent: function() {
     this.state.open ? this.closeContent(): this.openContent();
@@ -785,7 +785,8 @@ var FilesView = React.createClass({
         repo = this.props.repo,
         regexp = this.props.regexp,
         matches = this.props.matches,
-        totalMatches = this.props.totalMatches;
+        totalMatches = this.props.totalMatches,
+        filesExpanded = this.props.filesExpanded;
 
     var files = matches.map(function (match, index) {
       return <FileContentView ref={"file-"+index}
@@ -793,7 +794,8 @@ var FilesView = React.createClass({
         rev={rev}
         fileName={match.Filename}
         blocks={CoalesceMatches(match.Matches)}
-        regexp={regexp}/>
+        regexp={regexp}
+        defaultOpen={filesExpanded}/>
     });
 
     var more = '';
@@ -812,12 +814,12 @@ var FilesView = React.createClass({
 
 var RepoView = React.createClass({
   getInitialState: function() {
-    return { open: true };
+    return { open: true, filesExpanded: true };
   },
   toggleRepo: function() {
-    this.state.open ? this.closeRepo(): this.openRepo();
+    this.setState({open: !this.state.open});
   },
-  openOrCloseRepo: function (to_open) {
+  openOrCloseFiles: function (to_open) {
     for (var ref in this.refs.filesView.refs) {
       if (ref.startsWith("file-")) {
         if (to_open) {
@@ -827,13 +829,20 @@ var RepoView = React.createClass({
         }
       }
     }
-    this.setState({open: to_open});
   },
-  openRepo: function() {
-    this.openOrCloseRepo(true);
+  expandAllFiles: function() {
+    this.setState({open: true, filesExpanded: true});
+    this.openOrCloseFiles(true);
   },
-  closeRepo: function() {
-    this.openOrCloseRepo(false);
+  collapseAllFiles: function() {
+    this.setState({open: true, filesExpanded: false});
+    this.openOrCloseFiles(false);
+  },
+  openRepoOnly: function() {
+    this.setState({open: true});
+  },
+  closeRepoOnly: function() {
+    this.setState({open: false});
   },
   render: function() {
     return (
@@ -848,7 +857,8 @@ var RepoView = React.createClass({
             rev={this.props.rev}
             repo={this.props.repo}
             regexp={this.props.regexp}
-            totalMatches={this.props.files} />
+            totalMatches={this.props.files}
+            filesExpanded={this.state.filesExpanded} />
       </div>
     );
   }
@@ -868,9 +878,9 @@ var ResultView = React.createClass({
     for (var ref in this.refs) {
       if (ref.startsWith("repo-")) {
         if (to_open) {
-          this.refs[ref].openRepo();
+          this.refs[ref].expandAllFiles();
         } else {
-          this.refs[ref].closeRepo();
+          this.refs[ref].collapseAllFiles();
         }
       }
     }
@@ -880,6 +890,23 @@ var ResultView = React.createClass({
   },
   closeAll: function () {
     this.openOrCloseAll(false);
+  },
+  openOrCloseAllRepos: function (to_open) {
+    for (var ref in this.refs) {
+      if (ref.startsWith("repo-")) {
+        if (to_open) {
+          this.refs[ref].openRepoOnly();
+        } else {
+          this.refs[ref].closeRepoOnly();
+        }
+      }
+    }
+  },
+  openAllRepos: function () {
+    this.openOrCloseAllRepos(true);
+  },
+  closeAllRepos: function () {
+    this.openOrCloseAllRepos(false);
   },
   getInitialState: function() {
     return { results: null };
@@ -926,9 +953,15 @@ var ResultView = React.createClass({
     var actions = '';
     if (results.length > 0) {
       actions = (
-        <div className="actions">
-          <button onClick={this.openAll}><span className="octicon octicon-chevron-down"></span> Expand all</button>
-          <button onClick={this.closeAll}><span className="octicon octicon-chevron-up"></span> Collapse all</button>
+        <div>
+          <div className="actions">
+            <button onClick={this.openAllRepos}><span className="octicon octicon-chevron-down"></span> Expand all repos</button>
+            <button onClick={this.closeAllRepos}><span className="octicon octicon-chevron-up"></span> Collapse all repos</button>
+          </div>
+          <div className="actions">
+            <button onClick={this.openAll}><span className="octicon octicon-chevron-down"></span> Expand all files</button>
+            <button onClick={this.closeAll}><span className="octicon octicon-chevron-up"></span> Collapse all files</button>
+          </div>
         </div>
       )
     }

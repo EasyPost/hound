@@ -219,18 +219,23 @@ button:focus {
   margin-right: 10px;
 }
 
-#result > .actions {
-  padding: 5px 0 30px 0;
+#result .actions {
+  padding: 5px 0 10px 0;
+  clear: both;
 }
 
-#result > .actions > button {
+#result .actions:last-child {
+  padding-bottom: 30px;
+}
+
+#result .actions > button {
   margin: 2px;
   float: right;
   background-color: #f5f5f5;
   color: #666;
 }
 .repo {
-  margin-bottom: 100px;
+  margin-bottom: 50px;
 }
 
 .repo > .title {
@@ -252,6 +257,10 @@ button:focus {
 .repo > .title > .indicator {
   vertical-align: text-top;
   padding-left: 10px;
+}
+
+.repo.closed > .files {
+  display: none;
 }
 
 .files > .moar {
